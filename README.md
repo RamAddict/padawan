@@ -14,18 +14,18 @@ Pick a rudiment, see the sticking, hear it played over an adjustable metronome, 
 Plain static files, no build step:
 
 ```sh
-python -m http.server 8787   # then open http://localhost:8787
+python -m http.server 8787 -d public   # then open http://localhost:8787
 node test.mjs                # checks the rudiment data
 ```
 
 ## Deploy
 
 ```sh
-npx wrangler pages deploy . --project-name padawan
+npx wrangler deploy
 ```
 
 ## Contributing
 
-All rudiments live in [`rudiments.js`](rudiments.js) as a short pattern string, e.g. `'fR L R R fL R L L'` (`>` accent, `f` flam, `d` drag, `z` buzz, `-` rest). Corrections are welcome.
+All rudiments live in [`public/rudiments.js`](public/rudiments.js) as a short pattern string, e.g. `'fR L R R fL R L L'` (`>` accent, `f` flam, `d` drag, `z` buzz, `-` rest). Corrections are welcome.
 
 MIT licensed.

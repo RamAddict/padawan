@@ -1,6 +1,6 @@
 // Run: node test.mjs — every rudiment parses and fills whole beats.
 import assert from 'node:assert';
-import { RUDIMENTS, parse } from './rudiments.js';
+import { RUDIMENTS, parse } from './public/rudiments.js';
 
 assert.equal(RUDIMENTS.length, 40);
 RUDIMENTS.forEach((r, i) => {
