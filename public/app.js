@@ -12,7 +12,7 @@ const lang = state.lang ?? (['pt', 'es'].find((l) => navigator.language.startsWi
 const PT = {
   title: 'Padawan · 40 rudimentos de bateria + metrônomo',
   sub: '40 rudimentos · treino no pad',
-  legend: '<b style="color:var(--r)">D</b> direita · <b style="color:var(--l)">E</b> esquerda · <b style="color:var(--hi)">&gt;</b> acento · letras pequenas = notas de passagem (flam / drag) · <b>z</b> = buzz · sublinhado = um clique',
+  legend: '<b style="color:var(--r)">D</b> direita · <b style="color:var(--l)">E</b> esquerda · <b style="color:var(--hi-text)">&gt;</b> acento · letras pequenas = notas de passagem (flam / drag) · <b>z</b> = buzz · sublinhado = um clique',
   tempo: 'Andamento (BPM)', click: 'Clique do metrônomo', sound: 'Som do rudimento',
   trainer: 'Treino de velocidade: +5 BPM a cada 4 voltas',
   footer: '<kbd>Espaço</kbd> tocar/parar · <kbd>←</kbd><kbd>→</kbd> rudimento · <kbd>↑</kbd><kbd>↓</kbd> andamento. Grátis e <a href="https://github.com/RamAddict/padawan">código aberto</a>. Baseado nos Rudimentos Internacionais da PAS.',
@@ -22,14 +22,14 @@ const PT = {
   edHelp: 'Uma nota por item, separadas por espaço: <b>D</b>/<b>E</b> mão · <b>&gt;</b> acento · <b>f</b> flam · <b>d</b> drag · <b>z</b> buzz · <b>-</b> pausa. Exemplo: <code>&gt;D E D D &gt;E D E E</code>',
   metro: 'Metrônomo livre', Metronome: 'Metrônomo', tsig: 'Compasso', subdiv: 'Subdivisão',
   sub1: '♩ Semínimas', sub2: '♫ Colcheias', sub3: '3 Tercinas', sub4: '♬ Semicolcheias', sub5: '5 Quintinas', sub6: '6 Sextinas',
-  reset: '↺ Restaurar', digital: 'Visor digital', bar: 'compasso',
+  system: 'Tema do sistema', light: 'Tema claro', dark: 'Tema escuro', reset: '↺ Restaurar', digital: 'Visor digital', bar: 'compasso',
   tapHint: 'Toque num tempo para alternar acento → normal → mudo.', beep: 'Bipe', clickS: 'Clique', wood: 'Bloco de madeira',
   about: 'Sobre', bad: 'Nota inválida: ', del: 'Apagar', cancel: 'Cancelar', save: 'Salvar', noName: 'Dê um nome.', empty: 'Adicione algumas notas.',
 };
 const ES = {
   title: 'Padawan · 40 rudimentos de batería + metrónomo',
   sub: '40 rudimentos · práctica en pad',
-  legend: '<b style="color:var(--r)">D</b> derecha · <b style="color:var(--l)">I</b> izquierda · <b style="color:var(--hi)">&gt;</b> acento · letras pequeñas = notas de adorno (flam / drag) · <b>z</b> = buzz · subrayado = un clic',
+  legend: '<b style="color:var(--r)">D</b> derecha · <b style="color:var(--l)">I</b> izquierda · <b style="color:var(--hi-text)">&gt;</b> acento · letras pequeñas = notas de adorno (flam / drag) · <b>z</b> = buzz · subrayado = un clic',
   tempo: 'Tempo (BPM)', click: 'Clic del metrónomo', sound: 'Sonido del rudimento',
   trainer: 'Entrenador de velocidad: +5 BPM cada 4 vueltas',
   footer: '<kbd>Espacio</kbd> tocar/parar · <kbd>←</kbd><kbd>→</kbd> rudimento · <kbd>↑</kbd><kbd>↓</kbd> tempo. Gratis y de <a href="https://github.com/RamAddict/padawan">código abierto</a>. Basado en los Rudimentos Internacionales de la PAS.',
@@ -39,7 +39,7 @@ const ES = {
   edHelp: 'Una nota por elemento, separadas por espacios: <b>D</b>/<b>I</b> mano · <b>&gt;</b> acento · <b>f</b> flam · <b>d</b> drag · <b>z</b> buzz · <b>-</b> silencio. Ejemplo: <code>&gt;D I D D &gt;I D I I</code>',
   metro: 'Metrónomo libre', Metronome: 'Metrónomo', tsig: 'Compás', subdiv: 'Subdivisión',
   sub1: '♩ Negras', sub2: '♫ Corcheas', sub3: '3 Tresillos', sub4: '♬ Semicorcheas', sub5: '5 Quintillos', sub6: '6 Seisillos',
-  reset: '↺ Restablecer', digital: 'Pantalla digital', bar: 'compás',
+  system: 'Tema del sistema', light: 'Tema claro', dark: 'Tema oscuro', reset: '↺ Restablecer', digital: 'Pantalla digital', bar: 'compás',
   tapHint: 'Toca un tiempo para alternar acento → normal → silencio.', beep: 'Bip', clickS: 'Clic', wood: 'Bloque de madera',
   about: 'Acerca de', bad: 'Nota no válida: ', del: 'Borrar', cancel: 'Cancelar', save: 'Guardar', noName: 'Ponle un nombre.', empty: 'Agrega algunas notas.',
 };
@@ -360,6 +360,21 @@ $('edDel').onclick = () => {
   $('editor').close();
   restartIfPlaying(() => select(Math.min(state.idx, all().length - 1)));
 };
+
+// ---- theme: system (default) / light / dark ----
+const THEMES = { system: '◐', light: '☀', dark: '☾' };
+function applyTheme() {
+  const th = state.theme ?? 'system';
+  if (th === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = th;
+  $('theme').textContent = THEMES[th];
+  $('theme').title = t(th, { system: 'System theme', light: 'Light theme', dark: 'Dark theme' }[th]);
+}
+$('theme').onclick = () => {
+  const keys = Object.keys(THEMES);
+  state.theme = keys[(keys.indexOf(state.theme ?? 'system') + 1) % keys.length];
+  save(); applyTheme();
+};
+applyTheme();
 
 $('play').textContent = t('play', '▶ Play');
 renderList();

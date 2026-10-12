@@ -9,6 +9,7 @@ Pick a rudiment, see the sticking, hear it played over an adjustable metronome, 
 - Free metronome: time signature, subdivisions (8ths, triplets, 16ths, quintuplets, sextuplets), per-beat accent/mute, pendulum, tap tempo, 3 click sounds
 - Editor for your own rudiments (or copies of the built-in ones), saved in your browser
 - English, Portuguese and Spanish, picked from the browser language
+- Light, dark or system theme
 - Remembers your tempo per rudiment (localStorage)
 - Keyboard: `Space` play/stop · `←` `→` rudiment · `↑` `↓` tempo
 

@@ -2,12 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>try { const t = JSON.parse(localStorage.getItem('padawan') || '{}').theme; if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Padawan · 40 drum rudiments + metronome</title>
 <meta name="description" content="Free, open source practice-pad trainer: the 40 PAS drum rudiments with sticking, sound and a metronome. No login.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥁</text></svg>">
 <style>
-  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --text:#e8eaf0; --dim:#8a91a3; --r:#ff7a59; --l:#4fb3ff; --hi:#ffd166; }
+  /* light-dark(light, dark): follows the system theme unless data-theme forces one */
+  :root { color-scheme:light dark; --bg:light-dark(#f3f4f7,#0f1115); --panel:light-dark(#fff,#171a21); --line:light-dark(#dfe2e8,#262b36);
+    --text:light-dark(#15171c,#e8eaf0); --dim:light-dark(#5f6675,#8a91a3); --r:light-dark(#e0482a,#ff7a59); --l:light-dark(#1a7fd0,#4fb3ff);
+    --hi:light-dark(#ffc53d,#ffd166); --hi-text:light-dark(#a86b00,#ffd166); }
+  :root[data-theme="light"] { color-scheme:light; } :root[data-theme="dark"] { color-scheme:dark; }
   * { box-sizing: border-box; }
   body { margin:0; font:15px/1.4 system-ui, sans-serif; background:var(--bg); color:var(--text); display:grid; grid-template-columns:280px 1fr; height:100vh; }
   aside { background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; }
@@ -15,7 +20,7 @@
   aside h2 { margin:0; padding:12px 16px 4px; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--dim); }
   aside button { display:block; width:100%; text-align:left; padding:7px 16px; background:none; border:0; color:var(--text); font:inherit; cursor:pointer; }
   aside button:hover { background:var(--line); } aside button.on { background:var(--hi); color:#000; }
-  #lang, #aboutBtn { float:right; margin-left:6px; width:auto; color:var(--text); border:0; font-family:inherit; cursor:pointer; padding:4px 10px; font-size:12px; background:var(--line); border-radius:8px; }
+  #lang, #aboutBtn, #theme { float:right; margin-left:6px; width:auto; color:var(--text); border:0; font-family:inherit; cursor:pointer; padding:4px 10px; font-size:12px; background:var(--line); border-radius:8px; }
   aside button span { display:inline-block; width:28px; color:var(--dim); } aside button.on span { color:#000; }
   main { min-width:0; overflow-y:auto; padding:24px clamp(16px,4vw,48px); display:flex; flex-direction:column; gap:24px; }
   main > * { flex-shrink:0; }
@@ -25,7 +30,7 @@
   .beat { display:flex; gap:4px; border-bottom:3px solid var(--line); padding-bottom:6px; }
   .beat.down { border-color:var(--dim); }
   .note { width:44px; text-align:center; border-radius:8px; padding:4px 0; transition:background .05s; }
-  .note .acc { height:20px; font-weight:700; color:var(--hi); }
+  .note .acc { height:20px; font-weight:700; color:var(--hi-text); }
   .note .st { font-size:30px; font-weight:700; } .note .st sup { font-size:13px; opacity:.8; margin-right:1px; }
   .note.R .st { color:var(--r); } .note.L .st { color:var(--l); } .note.rest .st { color:var(--line); }
   .note.now { background:var(--hi); } .note.now .st, .note.now .acc { color:#000; }
@@ -65,7 +70,7 @@
   .dot { width:44px; height:44px; border-radius:50%; border:2px solid var(--dim); background:none; color:var(--text); font:700 16px system-ui, sans-serif; cursor:pointer; padding:0; }
   .dot.l2 { background:var(--r); border-color:var(--r); } .dot.l1 { background:var(--line); } .dot.l0 { opacity:.35; border-style:dashed; }
   .subdot { width:12px; height:12px; border-radius:50%; background:var(--line); }
-  .dot.now, .subdot.now { background:var(--hi); border-color:var(--hi); color:#000; opacity:1; }
+  .dot.now, .subdot.now { background:var(--hi); border-color:var(--hi-text); color:#000; opacity:1; }
   kbd { background:var(--line); border-radius:4px; padding:1px 5px; font-size:12px; }
   button { touch-action:manipulation; }
   @media (max-width:760px) { body { grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr; } .head h2 { font-size:20px; } .head small { display:none; }
@@ -73,7 +78,7 @@
 </style>
 </head>
 <body>
-<aside id="list"><h1>🥁 Padawan<select id="lang" aria-label="Language"><option value="en">EN</option><option value="pt">PT</option><option value="es">ES</option></select><button class="b" id="aboutBtn" data-t="about">About</button><small data-t="sub">40 rudiments · practice pad trainer</small></h1><nav id="items"></nav></aside>
+<aside id="list"><h1>🥁 Padawan<select id="lang" aria-label="Language"><option value="en">EN</option><option value="pt">PT</option><option value="es">ES</option></select><button class="b" id="theme"></button><button class="b" id="aboutBtn" data-t="about">About</button><small data-t="sub">40 rudiments · practice pad trainer</small></h1><nav id="items"></nav></aside>
 <main>
   <div class="head">
     <button class="b" id="prev" title="Previous (←)">◀</button>
@@ -90,7 +95,7 @@
     <div class="row"><label for="mDigital" data-t="digital">Digital display</label><input type="checkbox" class="switch" id="mDigital"></div>
     <p class="help" data-t="tapHint">Tap a beat to cycle accent → normal → mute.</p>
   </div>
-  <div class="legend" data-t="legend"><b style="color:var(--r)">R</b> right · <b style="color:var(--l)">L</b> left · <b style="color:var(--hi)">&gt;</b> accent · small letters = grace notes (flam / drag) · <b>z</b> = buzz · underline = one click</div>
+  <div class="legend" data-t="legend"><b style="color:var(--r)">R</b> right · <b style="color:var(--l)">L</b> left · <b style="color:var(--hi-text)">&gt;</b> accent · small letters = grace notes (flam / drag) · <b>z</b> = buzz · underline = one click</div>
   <div class="controls">
     <div class="card">
       <label data-t="tempo">Tempo (BPM)</label>
@@ -123,7 +128,7 @@
       <li>Turn the rudiment sound down to play with just the click.</li>
     </ol>
     <h4>Reading the notation</h4>
-    <p><b style="color:var(--r)">R</b> right, <b style="color:var(--l)">L</b> left, <b style="color:var(--hi)">&gt;</b> accent. Small letters before a note are grace notes: one is a flam, two is a drag. <b>z</b> is a buzz stroke. Each underlined group is one metronome click.</p>
+    <p><b style="color:var(--r)">R</b> right, <b style="color:var(--l)">L</b> left, <b style="color:var(--hi-text)">&gt;</b> accent. Small letters before a note are grace notes: one is a flam, two is a drag. <b>z</b> is a buzz stroke. Each underlined group is one metronome click.</p>
     <h4>Free metronome</h4>
     <p>First item in the list. Pick the time signature and subdivision, and tap a beat to accent or mute it. Good for working on a single stroke, or for anything else.</p>
     <h4>Your own rudiments</h4>
@@ -144,7 +149,7 @@
       <li>Abaixe o som do rudimento para tocar só com o clique.</li>
     </ol>
     <h4>Como ler</h4>
-    <p><b style="color:var(--r)">D</b> direita, <b style="color:var(--l)">E</b> esquerda, <b style="color:var(--hi)">&gt;</b> acento. Letras pequenas antes da nota são notas de passagem: uma é flam, duas é drag. <b>z</b> é buzz. Cada grupo sublinhado é um clique do metrônomo.</p>
+    <p><b style="color:var(--r)">D</b> direita, <b style="color:var(--l)">E</b> esquerda, <b style="color:var(--hi-text)">&gt;</b> acento. Letras pequenas antes da nota são notas de passagem: uma é flam, duas é drag. <b>z</b> é buzz. Cada grupo sublinhado é um clique do metrônomo.</p>
     <h4>Metrônomo livre</h4>
     <p>Primeiro item da lista. Escolha o compasso e a subdivisão, e toque num tempo para acentuar ou silenciar. Bom para treinar uma nota só, ou qualquer outra coisa.</p>
     <h4>Seus rudimentos</h4>
@@ -165,7 +170,7 @@
       <li>Baja el sonido del rudimento para tocar solo con el clic.</li>
     </ol>
     <h4>Cómo leer</h4>
-    <p><b style="color:var(--r)">D</b> derecha, <b style="color:var(--l)">I</b> izquierda, <b style="color:var(--hi)">&gt;</b> acento. Las letras pequeñas antes de una nota son notas de adorno: una es flam, dos es drag. <b>z</b> es buzz. Cada grupo subrayado es un clic del metrónomo.</p>
+    <p><b style="color:var(--r)">D</b> derecha, <b style="color:var(--l)">I</b> izquierda, <b style="color:var(--hi-text)">&gt;</b> acento. Las letras pequeñas antes de una nota son notas de adorno: una es flam, dos es drag. <b>z</b> es buzz. Cada grupo subrayado es un clic del metrónomo.</p>
     <h4>Metrónomo libre</h4>
     <p>Primer elemento de la lista. Elige el compás y la subdivisión, y toca un tiempo para acentuarlo o silenciarlo. Ideal para practicar una sola nota, o cualquier otra cosa.</p>
     <h4>Tus rudimentos</h4>
