@@ -22,9 +22,7 @@ node test.mjs                # checks the rudiment data
 
 ## Deploy
 
-```sh
-npx wrangler deploy
-```
+Every push to `main` deploys `public/` to GitHub Pages ([workflow](.github/workflows/pages.yml)): https://ramaddict.github.io/padawan/
 
 ## Contributing
 

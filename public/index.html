@@ -15,7 +15,7 @@
   aside h2 { margin:0; padding:12px 16px 4px; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--dim); }
   aside button { display:block; width:100%; text-align:left; padding:7px 16px; background:none; border:0; color:var(--text); font:inherit; cursor:pointer; }
   aside button:hover { background:var(--line); } aside button.on { background:var(--hi); color:#000; }
-  #lang { float:right; width:auto; padding:4px 10px; font-size:12px; background:var(--line); border-radius:8px; }
+  #lang, #aboutBtn { float:right; margin-left:6px; width:auto; padding:4px 10px; font-size:12px; background:var(--line); border-radius:8px; }
   aside button span { display:inline-block; width:28px; color:var(--dim); } aside button.on span { color:#000; }
   main { min-width:0; overflow-y:auto; padding:24px clamp(16px,4vw,48px); display:flex; flex-direction:column; gap:24px; }
   main > * { flex-shrink:0; }
@@ -47,6 +47,8 @@
   dialog textarea { font:18px/1.4 ui-monospace, monospace; }
   #edKeys { display:flex; flex-wrap:wrap; gap:4px; } #edKeys button { min-width:44px; font-family:ui-monospace, monospace; }
   #edPreview { min-height:0; padding:12px; background:var(--bg); } #edErr { color:var(--r); min-height:1.4em; font-size:13px; }
+  #about { max-width:560px; } #about h4 { margin:12px 0 0; } #about p, #about ol { margin:4px 0; color:var(--dim); } #about b { color:var(--text); }
+  html[lang="pt-BR"] .en, html:not([lang="pt-BR"]) .pt { display:none; }
   .help { color:var(--dim); font-size:13px; margin:0; }
   kbd { background:var(--line); border-radius:4px; padding:1px 5px; font-size:12px; }
   button { touch-action:manipulation; }
@@ -55,7 +57,7 @@
 </style>
 </head>
 <body>
-<aside id="list"><h1>🥁 Padawan<button class="b" id="lang"></button><small data-t="sub">40 rudiments · practice pad trainer</small></h1><nav id="items"></nav></aside>
+<aside id="list"><h1>🥁 Padawan<button class="b" id="lang"></button><button class="b" id="aboutBtn" data-t="about">About</button><small data-t="sub">40 rudiments · practice pad trainer</small></h1><nav id="items"></nav></aside>
 <main>
   <div class="head">
     <button class="b" id="prev" title="Previous (←)">◀</button>
@@ -82,6 +84,47 @@
   <footer data-t="footer"><kbd>Space</kbd> play/stop · <kbd>←</kbd><kbd>→</kbd> rudiment · <kbd>↑</kbd><kbd>↓</kbd> tempo.
     Free &amp; <a href="https://github.com/RamAddict/padawan">open source</a>. Based on the PAS International Drum Rudiments.</footer>
 </main>
+<dialog id="about"><form method="dialog">
+  <div class="en">
+    <h3>About Padawan</h3>
+    <p>Padawan is a free practice-pad trainer for the 40 PAS International Drum Rudiments. No login, no ads, nothing to install.</p>
+    <h4>How to practice</h4>
+    <ol>
+      <li>Pick a rudiment from the list.</li>
+      <li>Start slow (60–80 BPM) and press <b>Play</b> or <kbd>Space</kbd>.</li>
+      <li>Play along on your pad. The highlighted note is the one sounding now.</li>
+      <li>Once it feels clean and relaxed, go up a few BPM, or turn on the speed trainer.</li>
+      <li>Turn the rudiment sound down to play with just the click.</li>
+    </ol>
+    <h4>Reading the notation</h4>
+    <p><b style="color:var(--r)">R</b> right, <b style="color:var(--l)">L</b> left, <b style="color:var(--hi)">&gt;</b> accent. Small letters before a note are grace notes: one is a flam, two is a drag. <b>z</b> is a buzz stroke. Each underlined group is one metronome click.</p>
+    <h4>Your own rudiments</h4>
+    <p>Use <b>+ New rudiment</b> at the bottom of the list, or <b>✎</b> to copy and change any rudiment. They are saved only in this browser.</p>
+    <h4>Privacy</h4>
+    <p>No accounts and no tracking. Your tempos and rudiments stay in your browser's local storage.</p>
+    <p>Open source under the MIT license: <a href="https://github.com/RamAddict/padawan">github.com/RamAddict/padawan</a>. Corrections and ideas are welcome.</p>
+  </div>
+  <div class="pt">
+    <h3>Sobre o Padawan</h3>
+    <p>O Padawan é um treinador gratuito para praticar no pad os 40 Rudimentos Internacionais da PAS. Sem login, sem anúncios, sem instalar nada.</p>
+    <h4>Como praticar</h4>
+    <ol>
+      <li>Escolha um rudimento na lista.</li>
+      <li>Comece devagar (60–80 BPM) e aperte <b>Tocar</b> ou <kbd>Espaço</kbd>.</li>
+      <li>Toque junto no pad. A nota destacada é a que está soando.</li>
+      <li>Quando estiver limpo e relaxado, suba alguns BPM ou ligue o treino de velocidade.</li>
+      <li>Abaixe o som do rudimento para tocar só com o clique.</li>
+    </ol>
+    <h4>Como ler</h4>
+    <p><b style="color:var(--r)">D</b> direita, <b style="color:var(--l)">E</b> esquerda, <b style="color:var(--hi)">&gt;</b> acento. Letras pequenas antes da nota são notas de passagem: uma é flam, duas é drag. <b>z</b> é buzz. Cada grupo sublinhado é um clique do metrônomo.</p>
+    <h4>Seus rudimentos</h4>
+    <p>Use <b>+ Novo rudimento</b> no fim da lista, ou <b>✎</b> para copiar e mudar qualquer rudimento. Eles ficam salvos só neste navegador.</p>
+    <h4>Privacidade</h4>
+    <p>Sem contas e sem rastreamento. Seus andamentos e rudimentos ficam no armazenamento local do navegador.</p>
+    <p>Código aberto, licença MIT: <a href="https://github.com/RamAddict/padawan">github.com/RamAddict/padawan</a>. Correções e ideias são bem-vindas.</p>
+  </div>
+  <div class="row"><span></span><button class="b" autofocus style="background:var(--hi);color:#000">OK</button></div>
+</form></dialog>
 <dialog id="editor"><form method="dialog">
   <h3 data-t="edTitle">Rudiment editor</h3>
   <label for="edName" data-t="edName">Name</label><input id="edName" maxlength="60">

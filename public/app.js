@@ -17,7 +17,7 @@ const PT = {
   Mine: 'Meus rudimentos', new: '+ Novo rudimento', copy: ' (cópia)', confirmDel: 'Apagar este rudimento?',
   edTitle: 'Editor de rudimentos', edName: 'Nome', edSub: 'Notas por clique', edPattern: 'Padrão',
   edHelp: 'Uma nota por item, separadas por espaço: <b>D</b>/<b>E</b> mão · <b>&gt;</b> acento · <b>f</b> flam · <b>d</b> drag · <b>z</b> buzz · <b>-</b> pausa. Exemplo: <code>&gt;D E D D &gt;E D E E</code>',
-  bad: 'Nota inválida: ', del: 'Apagar', cancel: 'Cancelar', save: 'Salvar', noName: 'Dê um nome.', empty: 'Adicione algumas notas.',
+  about: 'Sobre', bad: 'Nota inválida: ', del: 'Apagar', cancel: 'Cancelar', save: 'Salvar', noName: 'Dê um nome.', empty: 'Adicione algumas notas.',
 };
 const t = (k, en) => (pt ? PT[k] : en);
 const hand = (h) => (pt ? { R: 'D', L: 'E' }[h] : h);
@@ -190,7 +190,7 @@ $('trainer').checked = state.trainer;
 $('trainer').onchange = (e) => { state.trainer = e.target.checked; loops = 0; save(); };
 
 document.addEventListener('keydown', (e) => {
-  if ($('editor').open || (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox')) return;
+  if (document.querySelector('dialog[open]') || (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox')) return;
   const k = { ' ': () => toggle(), ArrowLeft: () => $('prev').click(), ArrowRight: () => $('next').click(),
     ArrowUp: () => setBpm(bpm() + 1), ArrowDown: () => setBpm(bpm() - 1) }[e.key];
   if (k) { e.preventDefault(); e.target.blur?.(); k(); }
@@ -231,6 +231,7 @@ function openEditor(r) {
   $('editor').showModal();
 }
 $('edit').onclick = () => openEditor(rud);
+$('aboutBtn').onclick = () => $('about').showModal();
 $('edCancel').onclick = () => $('editor').close();
 $('edSave').onclick = () => {
   const name = $('edName').value.trim(), sub = +$('edSub').value;
