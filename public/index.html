@@ -15,7 +15,7 @@
   aside h2 { margin:0; padding:12px 16px 4px; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--dim); }
   aside button { display:block; width:100%; text-align:left; padding:7px 16px; background:none; border:0; color:var(--text); font:inherit; cursor:pointer; }
   aside button:hover { background:var(--line); } aside button.on { background:var(--hi); color:#000; }
-  #lang, #aboutBtn { float:right; margin-left:6px; width:auto; padding:4px 10px; font-size:12px; background:var(--line); border-radius:8px; }
+  #lang, #aboutBtn { float:right; margin-left:6px; width:auto; color:var(--text); border:0; font-family:inherit; cursor:pointer; padding:4px 10px; font-size:12px; background:var(--line); border-radius:8px; }
   aside button span { display:inline-block; width:28px; color:var(--dim); } aside button.on span { color:#000; }
   main { min-width:0; overflow-y:auto; padding:24px clamp(16px,4vw,48px); display:flex; flex-direction:column; gap:24px; }
   main > * { flex-shrink:0; }
@@ -43,21 +43,32 @@
   dialog { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:12px; width:min(640px,94vw); padding:20px; }
   dialog::backdrop { background:#000b; } dialog h3 { margin:0 0 12px; }
   dialog form { display:flex; flex-direction:column; gap:8px; } dialog label { color:var(--dim); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
-  dialog input, dialog select, dialog textarea { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font:inherit; }
+  dialog input, dialog select, dialog textarea, .card select { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font:inherit; }
   dialog textarea { font:18px/1.4 ui-monospace, monospace; }
   #edKeys { display:flex; flex-wrap:wrap; gap:4px; } #edKeys button { min-width:44px; font-family:ui-monospace, monospace; }
   #edPreview { min-height:0; padding:12px; background:var(--bg); } #edErr { color:var(--r); min-height:1.4em; font-size:13px; }
   #about { max-width:560px; } #about h4 { margin:12px 0 0; } #about p, #about ol { margin:4px 0; color:var(--dim); } #about b { color:var(--text); }
-  html[lang="pt-BR"] .en, html:not([lang="pt-BR"]) .pt { display:none; }
+  html:not([lang="en"]) .en, html:not([lang="pt"]) .pt, html:not([lang="es"]) .es { display:none; }
   .help { color:var(--dim); font-size:13px; margin:0; }
+  [hidden] { display:none !important; }
+  .metro { width:100%; display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .pendulum { position:relative; width:220px; height:120px; }
+  #needle { position:absolute; left:50%; bottom:0; width:4px; height:110px; margin-left:-2px; background:var(--hi); border-radius:2px; transform-origin:50% 100%; transform:rotate(-28deg); }
+  #needle::after { content:''; position:absolute; top:12px; left:-7px; width:18px; height:18px; border-radius:50%; background:var(--hi); }
+  .beats { display:flex; flex-wrap:wrap; justify-content:center; gap:10px 16px; }
+  .mbeat { display:flex; align-items:center; gap:5px; }
+  .dot { width:44px; height:44px; border-radius:50%; border:2px solid var(--dim); background:none; color:var(--text); font:700 16px system-ui, sans-serif; cursor:pointer; padding:0; }
+  .dot.l2 { background:var(--r); border-color:var(--r); } .dot.l1 { background:var(--line); } .dot.l0 { opacity:.35; border-style:dashed; }
+  .subdot { width:12px; height:12px; border-radius:50%; background:var(--line); }
+  .dot.now, .subdot.now { background:var(--hi); border-color:var(--hi); color:#000; opacity:1; }
   kbd { background:var(--line); border-radius:4px; padding:1px 5px; font-size:12px; }
   button { touch-action:manipulation; }
   @media (max-width:760px) { body { grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr; } .head h2 { font-size:20px; } .head small { display:none; }
-    main { gap:14px; padding:14px; } #score { min-height:0; padding:14px; } .legend { order:1; } footer { order:2; } aside { max-height:30vh; border-right:0; border-bottom:1px solid var(--line); } .note { width:34px; } .note .st { font-size:24px; } }
+    main { gap:14px; padding:14px; } #score { min-height:0; padding:14px; } .legend { order:1; } footer { order:2; } aside { max-height:30vh; border-right:0; border-bottom:1px solid var(--line); } .note { width:34px; } .note .st { font-size:24px; } .dot { width:34px; height:34px; } }
 </style>
 </head>
 <body>
-<aside id="list"><h1>🥁 Padawan<button class="b" id="lang"></button><button class="b" id="aboutBtn" data-t="about">About</button><small data-t="sub">40 rudiments · practice pad trainer</small></h1><nav id="items"></nav></aside>
+<aside id="list"><h1>🥁 Padawan<select id="lang" aria-label="Language"><option value="en">EN</option><option value="pt">PT</option><option value="es">ES</option></select><button class="b" id="aboutBtn" data-t="about">About</button><small data-t="sub">40 rudiments · practice pad trainer</small></h1><nav id="items"></nav></aside>
 <main>
   <div class="head">
     <button class="b" id="prev" title="Previous (←)">◀</button>
@@ -66,17 +77,25 @@
     <button class="b" id="next" title="Next (→)">▶</button>
   </div>
   <div id="score" class="score"></div>
+  <div class="card" id="metroControls" hidden>
+    <div class="row"><label for="mBeats" data-t="tsig">Time signature</label><span><select id="mBeats"></select> / <select id="mDen"><option>4</option><option>8</option></select></span></div>
+    <div class="row"><label for="mSub" data-t="subdiv">Subdivision</label><select id="mSub">
+      <option value="1" data-t="sub1">♩ Quarter notes</option><option value="2" data-t="sub2">♫ Eighth notes</option><option value="3" data-t="sub3">3 Triplets</option>
+      <option value="4" data-t="sub4">♬ Sixteenth notes</option><option value="5" data-t="sub5">5 Quintuplets</option><option value="6" data-t="sub6">6 Sextuplets</option></select></div>
+    <p class="help" data-t="tapHint">Tap a beat to cycle accent → normal → mute.</p>
+  </div>
   <div class="legend" data-t="legend"><b style="color:var(--r)">R</b> right · <b style="color:var(--l)">L</b> left · <b style="color:var(--hi)">&gt;</b> accent · small letters = grace notes (flam / drag) · <b>z</b> = buzz · underline = one click</div>
   <div class="controls">
     <div class="card">
       <label data-t="tempo">Tempo (BPM)</label>
-      <div class="bpm"><button class="b" id="down" title="−5 (↓)">−5</button><output id="bpmOut"></output><button class="b" id="up" title="+5 (↑)">+5</button></div>
+      <div class="bpm"><button class="b" id="down" title="−5 (↓)">−5</button><output id="bpmOut"></output><button class="b" id="up" title="+5 (↑)">+5</button><button class="b" id="tap">Tap</button></div>
       <input type="range" id="bpm" min="30" max="240">
       <div class="presets" id="presets"><button class="b">60</button><button class="b">80</button><button class="b">100</button><button class="b">120</button><button class="b">140</button></div>
       <button class="b" id="play">▶ Play</button>
     </div>
     <div class="card">
       <label data-t="click">Metronome click</label><input type="range" id="clickVol" min="0" max="1" step="0.05">
+      <select id="clickSound" aria-label="Click sound"><option value="beep" data-t="beep">Beep</option><option value="click" data-t="clickS">Click</option><option value="wood" data-t="wood">Wood block</option></select>
       <label data-t="sound">Rudiment sound</label><input type="range" id="padVol" min="0" max="1" step="0.05">
       <div class="row"><label for="trainer" data-t="trainer">Speed trainer: +5 BPM every 4 loops</label><input type="checkbox" id="trainer"></div>
     </div>
@@ -98,6 +117,8 @@
     </ol>
     <h4>Reading the notation</h4>
     <p><b style="color:var(--r)">R</b> right, <b style="color:var(--l)">L</b> left, <b style="color:var(--hi)">&gt;</b> accent. Small letters before a note are grace notes: one is a flam, two is a drag. <b>z</b> is a buzz stroke. Each underlined group is one metronome click.</p>
+    <h4>Free metronome</h4>
+    <p>First item in the list. Pick the time signature and subdivision, and tap a beat to accent or mute it. Good for working on a single stroke, or for anything else.</p>
     <h4>Your own rudiments</h4>
     <p>Use <b>+ New rudiment</b> at the bottom of the list, or <b>✎</b> to copy and change any rudiment. They are saved only in this browser.</p>
     <h4>Privacy</h4>
@@ -117,11 +138,34 @@
     </ol>
     <h4>Como ler</h4>
     <p><b style="color:var(--r)">D</b> direita, <b style="color:var(--l)">E</b> esquerda, <b style="color:var(--hi)">&gt;</b> acento. Letras pequenas antes da nota são notas de passagem: uma é flam, duas é drag. <b>z</b> é buzz. Cada grupo sublinhado é um clique do metrônomo.</p>
+    <h4>Metrônomo livre</h4>
+    <p>Primeiro item da lista. Escolha o compasso e a subdivisão, e toque num tempo para acentuar ou silenciar. Bom para treinar uma nota só, ou qualquer outra coisa.</p>
     <h4>Seus rudimentos</h4>
     <p>Use <b>+ Novo rudimento</b> no fim da lista, ou <b>✎</b> para copiar e mudar qualquer rudimento. Eles ficam salvos só neste navegador.</p>
     <h4>Privacidade</h4>
     <p>Sem contas e sem rastreamento. Seus andamentos e rudimentos ficam no armazenamento local do navegador.</p>
     <p>Código aberto, licença MIT: <a href="https://github.com/RamAddict/padawan">github.com/RamAddict/padawan</a>. Correções e ideias são bem-vindas.</p>
+  </div>
+  <div class="es">
+    <h3>Acerca de Padawan</h3>
+    <p>Padawan es un entrenador gratuito para practicar en el pad los 40 Rudimentos Internacionales de la PAS. Sin registro, sin anuncios, sin instalar nada.</p>
+    <h4>Cómo practicar</h4>
+    <ol>
+      <li>Elige un rudimento de la lista.</li>
+      <li>Empieza lento (60–80 BPM) y pulsa <b>Tocar</b> o <kbd>Espacio</kbd>.</li>
+      <li>Toca junto en el pad. La nota resaltada es la que está sonando.</li>
+      <li>Cuando salga limpio y relajado, sube unos BPM o activa el entrenador de velocidad.</li>
+      <li>Baja el sonido del rudimento para tocar solo con el clic.</li>
+    </ol>
+    <h4>Cómo leer</h4>
+    <p><b style="color:var(--r)">D</b> derecha, <b style="color:var(--l)">I</b> izquierda, <b style="color:var(--hi)">&gt;</b> acento. Las letras pequeñas antes de una nota son notas de adorno: una es flam, dos es drag. <b>z</b> es buzz. Cada grupo subrayado es un clic del metrónomo.</p>
+    <h4>Metrónomo libre</h4>
+    <p>Primer elemento de la lista. Elige el compás y la subdivisión, y toca un tiempo para acentuarlo o silenciarlo. Ideal para practicar una sola nota, o cualquier otra cosa.</p>
+    <h4>Tus rudimentos</h4>
+    <p>Usa <b>+ Nuevo rudimento</b> al final de la lista, o <b>✎</b> para copiar y cambiar cualquier rudimento. Se guardan solo en este navegador.</p>
+    <h4>Privacidad</h4>
+    <p>Sin cuentas y sin rastreo. Tus tempos y rudimentos quedan en el almacenamiento local del navegador.</p>
+    <p>Código abierto, licencia MIT: <a href="https://github.com/RamAddict/padawan">github.com/RamAddict/padawan</a>. Correcciones e ideas son bienvenidas.</p>
   </div>
   <div class="row"><span></span><button class="b" autofocus style="background:var(--hi);color:#000">OK</button></div>
 </form></dialog>

@@ -6,8 +6,9 @@ Pick a rudiment, see the sticking, hear it played over an adjustable metronome, 
 - Sticking with accents, flams, drags and buzz strokes, with the current note highlighted as it plays
 - Metronome with an adjustable tempo (30–240 BPM) and separate click and rudiment volumes
 - Quick tempo buttons (60/80/100/120/140) and a speed trainer: +5 BPM every 4 loops
+- Free metronome: time signature, subdivisions (8ths, triplets, 16ths, quintuplets, sextuplets), per-beat accent/mute, pendulum, tap tempo, 3 click sounds
 - Editor for your own rudiments (or copies of the built-in ones), saved in your browser
-- English and Portuguese, picked from the browser language
+- English, Portuguese and Spanish, picked from the browser language
 - Remembers your tempo per rudiment (localStorage)
 - Keyboard: `Space` play/stop · `←` `→` rudiment · `↑` `↓` tempo
 

@@ -79,3 +79,14 @@ export const PT_NAMES = [
   'Drag', 'Drag Tap Simples', 'Drag Tap Duplo', 'Lição 25', 'Dragadiddle Simples', 'Drag Paradiddle nº 1',
   'Drag Paradiddle nº 2', 'Ratamacue Simples', 'Ratamacue Duplo', 'Ratamacue Triplo',
 ];
+
+export const ES_NAMES = [
+  'Redoble de Golpes Simples', 'Golpe Simple de Cuatro', 'Golpe Simple de Siete', 'Redoble de Rebote Múltiple',
+  'Redoble de Golpes Triples', 'Redoble de Golpes Dobles', 'Redoble de 5 Golpes', 'Redoble de 6 Golpes', 'Redoble de 7 Golpes',
+  'Redoble de 9 Golpes', 'Redoble de 10 Golpes', 'Redoble de 11 Golpes', 'Redoble de 13 Golpes', 'Redoble de 15 Golpes', 'Redoble de 17 Golpes',
+  'Paradiddle Simple', 'Paradiddle Doble', 'Paradiddle Triple', 'Paradiddle-Diddle Simple',
+  'Flam', 'Flam Acentuado', 'Flam Tap', 'Flamacue', 'Flam Paradiddle', 'Flammed Mill Simple', 'Flam Paradiddle-Diddle',
+  'Pataflafla', 'Tresillo Suizo', 'Flam Tap Invertido', 'Flam Drag',
+  'Drag', 'Drag Tap Simple', 'Drag Tap Doble', 'Lección 25', 'Dragadiddle Simple', 'Drag Paradiddle nº 1',
+  'Drag Paradiddle nº 2', 'Ratamacue Simple', 'Ratamacue Doble', 'Ratamacue Triple',
+];
