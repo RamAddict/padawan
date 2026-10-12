@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Padawan · 40 drum rudiments + metronome</title>
+<meta name="description" content="Free, open source practice-pad trainer: the 40 PAS drum rudiments with sticking, sound and a metronome. No login.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥁</text></svg>">
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --text:#e8eaf0; --dim:#8a91a3; --r:#ff7a59; --l:#4fb3ff; --hi:#ffd166; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.4 system-ui, sans-serif; background:var(--bg); color:var(--text); display:grid; grid-template-columns:280px 1fr; height:100vh; }
+  aside { background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; }
+  aside h1 { margin:0; padding:16px; font-size:20px; } aside h1 small { display:block; color:var(--dim); font-size:12px; font-weight:400; }
+  aside h2 { margin:0; padding:12px 16px 4px; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--dim); }
+  aside button { display:block; width:100%; text-align:left; padding:7px 16px; background:none; border:0; color:var(--text); font:inherit; cursor:pointer; }
+  aside button:hover { background:var(--line); } aside button.on { background:var(--hi); color:#000; }
+  aside button span { display:inline-block; width:28px; color:var(--dim); } aside button.on span { color:#000; }
+  main { min-width:0; overflow-y:auto; padding:24px clamp(16px,4vw,48px); display:flex; flex-direction:column; gap:24px; }
+  main > * { flex-shrink:0; }
+  .head { display:flex; align-items:center; gap:12px; } .head h2 { margin:0; font-size:28px; flex:1; }
+  .head small { color:var(--dim); font-size:14px; font-weight:400; margin-left:8px; }
+  #score { display:flex; flex-wrap:wrap; gap:6px 18px; padding:24px; background:var(--panel); border-radius:12px; min-height:140px; align-items:flex-end; }
+  .beat { display:flex; gap:4px; border-bottom:3px solid var(--line); padding-bottom:6px; }
+  .beat.down { border-color:var(--dim); }
+  .note { width:44px; text-align:center; border-radius:8px; padding:4px 0; transition:background .05s; }
+  .note .acc { height:20px; font-weight:700; color:var(--hi); }
+  .note .st { font-size:30px; font-weight:700; } .note .st sup { font-size:13px; opacity:.8; margin-right:1px; }
+  .note.R .st { color:var(--r); } .note.L .st { color:var(--l); } .note.rest .st { color:var(--line); }
+  .note.now { background:var(--hi); } .note.now .st, .note.now .acc { color:#000; }
+  .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr)); gap:16px; }
+  .card { background:var(--panel); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .card label { color:var(--dim); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+  .bpm { display:flex; align-items:center; gap:8px; } .bpm output { font-size:40px; font-weight:700; min-width:80px; text-align:center; }
+  input[type=range] { width:100%; accent-color:var(--hi); }
+  button.b { background:var(--line); color:var(--text); border:0; border-radius:8px; padding:8px 12px; font:inherit; cursor:pointer; }
+  button.b:hover { filter:brightness(1.3); }
+  #play { background:var(--hi); color:#000; font-size:20px; font-weight:700; padding:14px 28px; border-radius:12px; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .legend, footer { color:var(--dim); font-size:13px; } a { color:var(--l); }
+  kbd { background:var(--line); border-radius:4px; padding:1px 5px; font-size:12px; }
+  @media (max-width:760px) { body { grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr; } .head h2 { font-size:20px; } aside { max-height:30vh; border-right:0; border-bottom:1px solid var(--line); } .note { width:34px; } .note .st { font-size:24px; } }
+</style>
+</head>
+<body>
+<aside id="list"><h1>🥁 Padawan<small>40 rudiments · practice pad trainer</small></h1></aside>
+<main>
+  <div class="head">
+    <button class="b" id="prev" title="Previous (←)">◀</button>
+    <h2 id="title"></h2>
+    <button class="b" id="next" title="Next (→)">▶</button>
+  </div>
+  <div id="score"></div>
+  <div class="legend"><b style="color:var(--r)">R</b> right · <b style="color:var(--l)">L</b> left · <b style="color:var(--hi)">&gt;</b> accent · small letters = grace notes (flam / drag) · <b>z</b> = buzz · underline = one click</div>
+  <div class="controls">
+    <div class="card">
+      <label>Tempo (BPM)</label>
+      <div class="bpm"><button class="b" id="down" title="−5 (↓)">−5</button><output id="bpmOut"></output><button class="b" id="up" title="+5 (↑)">+5</button></div>
+      <input type="range" id="bpm" min="30" max="240">
+      <button class="b" id="play">▶ Play</button>
+    </div>
+    <div class="card">
+      <label>Metronome click</label><input type="range" id="clickVol" min="0" max="1" step="0.05">
+      <label>Rudiment sound</label><input type="range" id="padVol" min="0" max="1" step="0.05">
+      <div class="row"><label for="trainer">Speed trainer: +5 BPM every 4 loops</label><input type="checkbox" id="trainer"></div>
+    </div>
+  </div>
+  <footer><kbd>Space</kbd> play/stop · <kbd>←</kbd><kbd>→</kbd> rudiment · <kbd>↑</kbd><kbd>↓</kbd> tempo.
+    Free &amp; <a href="https://github.com/RamAddict/padawan">open source</a>. Based on the PAS International Drum Rudiments.</footer>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>
