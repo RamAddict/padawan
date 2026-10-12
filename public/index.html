@@ -15,12 +15,13 @@
   aside h2 { margin:0; padding:12px 16px 4px; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--dim); }
   aside button { display:block; width:100%; text-align:left; padding:7px 16px; background:none; border:0; color:var(--text); font:inherit; cursor:pointer; }
   aside button:hover { background:var(--line); } aside button.on { background:var(--hi); color:#000; }
+  #lang { float:right; width:auto; padding:4px 10px; font-size:12px; background:var(--line); border-radius:8px; }
   aside button span { display:inline-block; width:28px; color:var(--dim); } aside button.on span { color:#000; }
   main { min-width:0; overflow-y:auto; padding:24px clamp(16px,4vw,48px); display:flex; flex-direction:column; gap:24px; }
   main > * { flex-shrink:0; }
   .head { display:flex; align-items:center; gap:12px; } .head h2 { margin:0; font-size:28px; flex:1; }
   .head small { color:var(--dim); font-size:14px; font-weight:400; margin-left:8px; }
-  #score { display:flex; flex-wrap:wrap; gap:6px 18px; padding:24px; background:var(--panel); border-radius:12px; min-height:140px; align-items:flex-end; }
+  .score { display:flex; flex-wrap:wrap; gap:6px 18px; padding:24px; background:var(--panel); border-radius:12px; min-height:140px; align-items:flex-end; }
   .beat { display:flex; gap:4px; border-bottom:3px solid var(--line); padding-bottom:6px; }
   .beat.down { border-color:var(--dim); }
   .note { width:44px; text-align:center; border-radius:8px; padding:4px 0; transition:background .05s; }
@@ -36,27 +37,40 @@
   button.b { background:var(--line); color:var(--text); border:0; border-radius:8px; padding:8px 12px; font:inherit; cursor:pointer; }
   button.b:hover { filter:brightness(1.3); }
   #play { background:var(--hi); color:#000; font-size:20px; font-weight:700; padding:14px 28px; border-radius:12px; }
+  .presets { display:flex; gap:6px; } .presets button { flex:1; padding:8px 0; } .presets button.on { background:var(--hi); color:#000; }
   .row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
   .legend, footer { color:var(--dim); font-size:13px; } a { color:var(--l); }
+  dialog { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:12px; width:min(640px,94vw); padding:20px; }
+  dialog::backdrop { background:#000b; } dialog h3 { margin:0 0 12px; }
+  dialog form { display:flex; flex-direction:column; gap:8px; } dialog label { color:var(--dim); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+  dialog input, dialog select, dialog textarea { background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font:inherit; }
+  dialog textarea { font:18px/1.4 ui-monospace, monospace; }
+  #edKeys { display:flex; flex-wrap:wrap; gap:4px; } #edKeys button { min-width:44px; font-family:ui-monospace, monospace; }
+  #edPreview { min-height:0; padding:12px; background:var(--bg); } #edErr { color:var(--r); min-height:1.4em; font-size:13px; }
+  .help { color:var(--dim); font-size:13px; margin:0; }
   kbd { background:var(--line); border-radius:4px; padding:1px 5px; font-size:12px; }
-  @media (max-width:760px) { body { grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr; } .head h2 { font-size:20px; } aside { max-height:30vh; border-right:0; border-bottom:1px solid var(--line); } .note { width:34px; } .note .st { font-size:24px; } }
+  button { touch-action:manipulation; }
+  @media (max-width:760px) { body { grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr; } .head h2 { font-size:20px; } .head small { display:none; }
+    main { gap:14px; padding:14px; } #score { min-height:0; padding:14px; } .legend { order:1; } footer { order:2; } aside { max-height:30vh; border-right:0; border-bottom:1px solid var(--line); } .note { width:34px; } .note .st { font-size:24px; } }
 </style>
 </head>
 <body>
-<aside id="list"><h1>🥁 Padawan<small data-t="sub">40 rudiments · practice pad trainer</small></h1></aside>
+<aside id="list"><h1>🥁 Padawan<button class="b" id="lang"></button><small data-t="sub">40 rudiments · practice pad trainer</small></h1><nav id="items"></nav></aside>
 <main>
   <div class="head">
     <button class="b" id="prev" title="Previous (←)">◀</button>
     <h2 id="title"></h2>
+    <button class="b" id="edit" title="Edit / copy to my rudiments">✎</button>
     <button class="b" id="next" title="Next (→)">▶</button>
   </div>
-  <div id="score"></div>
+  <div id="score" class="score"></div>
   <div class="legend" data-t="legend"><b style="color:var(--r)">R</b> right · <b style="color:var(--l)">L</b> left · <b style="color:var(--hi)">&gt;</b> accent · small letters = grace notes (flam / drag) · <b>z</b> = buzz · underline = one click</div>
   <div class="controls">
     <div class="card">
       <label data-t="tempo">Tempo (BPM)</label>
       <div class="bpm"><button class="b" id="down" title="−5 (↓)">−5</button><output id="bpmOut"></output><button class="b" id="up" title="+5 (↑)">+5</button></div>
       <input type="range" id="bpm" min="30" max="240">
+      <div class="presets" id="presets"><button class="b">60</button><button class="b">80</button><button class="b">100</button><button class="b">120</button><button class="b">140</button></div>
       <button class="b" id="play">▶ Play</button>
     </div>
     <div class="card">
@@ -67,8 +81,21 @@
   </div>
   <footer data-t="footer"><kbd>Space</kbd> play/stop · <kbd>←</kbd><kbd>→</kbd> rudiment · <kbd>↑</kbd><kbd>↓</kbd> tempo.
     Free &amp; <a href="https://github.com/RamAddict/padawan">open source</a>. Based on the PAS International Drum Rudiments.</footer>
-  <div><button class="b" id="lang"></button></div>
 </main>
+<dialog id="editor"><form method="dialog">
+  <h3 data-t="edTitle">Rudiment editor</h3>
+  <label for="edName" data-t="edName">Name</label><input id="edName" maxlength="60">
+  <label for="edSub" data-t="edSub">Notes per click</label>
+  <select id="edSub"><option>2</option><option>3</option><option selected>4</option><option>6</option><option>8</option></select>
+  <label for="edPattern" data-t="edPattern">Pattern</label>
+  <div id="edKeys"></div>
+  <textarea id="edPattern" rows="3" spellcheck="false"></textarea>
+  <p class="help" data-t="edHelp">One token per note, separated by spaces: <b>R</b>/<b>L</b> hand · <b>&gt;</b> accent · <b>f</b> flam · <b>d</b> drag · <b>z</b> buzz · <b>-</b> rest. Example: <code>&gt;R L R R &gt;L R L L</code></p>
+  <div id="edPreview" class="score"></div>
+  <div id="edErr"></div>
+  <div class="row"><button type="button" class="b" id="edDel" data-t="del">Delete</button><span style="flex:1"></span>
+    <button type="button" class="b" id="edCancel" data-t="cancel">Cancel</button><button type="button" class="b" id="edSave" style="background:var(--hi);color:#000" data-t="save">Save</button></div>
+</form></dialog>
 <script type="module" src="app.js"></script>
 </body>
 </html>
