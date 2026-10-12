@@ -1,4 +1,4 @@
-import { RUDIMENTS, PT_NAMES, ES_NAMES, parse } from './rudiments.js';
+import { RUDIMENTS, PT_NAMES, ES_NAMES, parse } from './rudiments.js?v=dev'; // ?v= is replaced with the commit on deploy (cache busting)
 
 const $ = (id) => document.getElementById(id);
 const saved = JSON.parse(localStorage.getItem('padawan') || '{}');
@@ -21,6 +21,7 @@ const PT = {
   edHelp: 'Uma nota por item, separadas por espaço: <b>D</b>/<b>E</b> mão · <b>&gt;</b> acento · <b>f</b> flam · <b>d</b> drag · <b>z</b> buzz · <b>-</b> pausa. Exemplo: <code>&gt;D E D D &gt;E D E E</code>',
   metro: 'Metrônomo livre', Metronome: 'Metrônomo', tsig: 'Compasso', subdiv: 'Subdivisão',
   sub1: '♩ Semínimas', sub2: '♫ Colcheias', sub3: '3 Tercinas', sub4: '♬ Semicolcheias', sub5: '5 Quintinas', sub6: '6 Sextinas',
+  digital: 'Visor digital', bar: 'compasso',
   tapHint: 'Toque num tempo para alternar acento → normal → mudo.', beep: 'Bipe', clickS: 'Clique', wood: 'Bloco de madeira',
   about: 'Sobre', bad: 'Nota inválida: ', del: 'Apagar', cancel: 'Cancelar', save: 'Salvar', noName: 'Dê um nome.', empty: 'Adicione algumas notas.',
 };
@@ -37,6 +38,7 @@ const ES = {
   edHelp: 'Una nota por elemento, separadas por espacios: <b>D</b>/<b>I</b> mano · <b>&gt;</b> acento · <b>f</b> flam · <b>d</b> drag · <b>z</b> buzz · <b>-</b> silencio. Ejemplo: <code>&gt;D I D D &gt;I D I I</code>',
   metro: 'Metrónomo libre', Metronome: 'Metrónomo', tsig: 'Compás', subdiv: 'Subdivisión',
   sub1: '♩ Negras', sub2: '♫ Corcheas', sub3: '3 Tresillos', sub4: '♬ Semicorcheas', sub5: '5 Quintillos', sub6: '6 Seisillos',
+  digital: 'Pantalla digital', bar: 'compás',
   tapHint: 'Toca un tiempo para alternar acento → normal → silencio.', beep: 'Bip', clickS: 'Clic', wood: 'Bloque de madera',
   about: 'Acerca de', bad: 'Nota no válida: ', del: 'Borrar', cancel: 'Cancelar', save: 'Guardar', noName: 'Ponle un nombre.', empty: 'Agrega algunas notas.',
 };
@@ -96,7 +98,7 @@ function renderScore(notes, sub) {
 
 function renderMetro() {
   const m = state.metro;
-  let html = '<div class="metro"><div class="pendulum"><div id="needle"></div></div><div class="beats">';
+  let html = `<div class="metro">${m.digital ? `<div id="digital" class="digital l${m.acc[0]}">1<small>${t('bar', 'bar')} 1</small></div>` : '<div class="pendulum"><div id="needle"></div></div>'}<div class="beats">`;
   for (let b = 0; b < m.beats; b++) html += `<div class="mbeat"><button class="dot l${m.acc[b]}" data-b="${b}">${b + 1}</button>${'<span class="subdot"></span>'.repeat(m.sub - 1)}</div>`;
   return html + '</div></div>';
 }
@@ -204,6 +206,11 @@ function draw() {
   let cur;
   while (queue.length && queue[0].t <= ctx.currentTime) cur = queue.shift();
   if (cur) { cells.forEach((c, i) => c.classList.toggle('now', i === cur.i)); last = cur; }
+  if (cur && $('digital')) {
+    const b = Math.floor(cur.i / rud.sub);
+    $('digital').className = `digital l${state.metro.acc[b]}`;
+    $('digital').innerHTML = `${b + 1}<small>${t('bar', 'bar')} ${Math.floor((cur.beat - 1) / state.metro.beats) + 1}</small>`;
+  }
   if (rud.metro && last && $('needle')) {
     // pendulum: at an extreme on each beat, swinging to the other side by the next one
     const p = Math.min(1, (ctx.currentTime - last.t + (last.i % rud.sub) * 60 / bpm() / rud.sub) / (60 / bpm()));
@@ -259,6 +266,11 @@ $('mBeats').onchange = $('mDen').onchange = () => {
   const m = state.metro;
   m.beats = +$('mBeats').value; m.den = +$('mDen').value; m.acc = defaultAcc(m.beats, m.den);
   save(); restartIfPlaying(() => select(state.idx));
+};
+$('mDigital').checked = !!state.metro.digital;
+$('mDigital').onchange = (e) => {
+  state.metro.digital = e.target.checked; save();
+  $('score').innerHTML = renderMetro(); cells = $('score').querySelectorAll('.dot, .subdot'); // swap view without restarting
 };
 $('mSub').onchange = () => { state.metro.sub = +$('mSub').value; save(); restartIfPlaying(() => select(state.idx)); };
 $('score').onclick = (e) => {

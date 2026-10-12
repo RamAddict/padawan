@@ -55,6 +55,11 @@
   .pendulum { position:relative; width:220px; height:120px; }
   #needle { position:absolute; left:50%; bottom:0; width:4px; height:110px; margin-left:-2px; background:var(--hi); border-radius:2px; transform-origin:50% 100%; transform:rotate(-28deg); }
   #needle::after { content:''; position:absolute; top:12px; left:-7px; width:18px; height:18px; border-radius:50%; background:var(--hi); }
+  .digital { font:800 120px/1 system-ui, sans-serif; color:var(--text); font-variant-numeric:tabular-nums; text-align:center; }
+  .digital.l2 { color:var(--r); } .digital.l0 { opacity:.3; } .digital small { display:block; font-size:14px; font-weight:400; color:var(--dim); margin-top:6px; }
+  .switch { appearance:none; flex-shrink:0; width:40px; height:22px; margin:0; border-radius:11px; background:var(--line); position:relative; cursor:pointer; transition:background .15s; }
+  .switch::after { content:''; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:var(--dim); transition:left .15s; }
+  .switch:checked { background:var(--hi); } .switch:checked::after { left:21px; background:#000; }
   .beats { display:flex; flex-wrap:wrap; justify-content:center; gap:10px 16px; }
   .mbeat { display:flex; align-items:center; gap:5px; }
   .dot { width:44px; height:44px; border-radius:50%; border:2px solid var(--dim); background:none; color:var(--text); font:700 16px system-ui, sans-serif; cursor:pointer; padding:0; }
@@ -82,6 +87,7 @@
     <div class="row"><label for="mSub" data-t="subdiv">Subdivision</label><select id="mSub">
       <option value="1" data-t="sub1">♩ Quarter notes</option><option value="2" data-t="sub2">♫ Eighth notes</option><option value="3" data-t="sub3">3 Triplets</option>
       <option value="4" data-t="sub4">♬ Sixteenth notes</option><option value="5" data-t="sub5">5 Quintuplets</option><option value="6" data-t="sub6">6 Sextuplets</option></select></div>
+    <div class="row"><label for="mDigital" data-t="digital">Digital display</label><input type="checkbox" class="switch" id="mDigital"></div>
     <p class="help" data-t="tapHint">Tap a beat to cycle accent → normal → mute.</p>
   </div>
   <div class="legend" data-t="legend"><b style="color:var(--r)">R</b> right · <b style="color:var(--l)">L</b> left · <b style="color:var(--hi)">&gt;</b> accent · small letters = grace notes (flam / drag) · <b>z</b> = buzz · underline = one click</div>
@@ -97,7 +103,7 @@
       <label data-t="click">Metronome click</label><input type="range" id="clickVol" min="0" max="1" step="0.05">
       <select id="clickSound" aria-label="Click sound"><option value="beep" data-t="beep">Beep</option><option value="click" data-t="clickS">Click</option><option value="wood" data-t="wood">Wood block</option></select>
       <label data-t="sound">Rudiment sound</label><input type="range" id="padVol" min="0" max="1" step="0.05">
-      <div class="row"><label for="trainer" data-t="trainer">Speed trainer: +5 BPM every 4 loops</label><input type="checkbox" id="trainer"></div>
+      <div class="row"><label for="trainer" data-t="trainer">Speed trainer: +5 BPM every 4 loops</label><input type="checkbox" class="switch" id="trainer"></div>
     </div>
   </div>
   <footer data-t="footer"><kbd>Space</kbd> play/stop · <kbd>←</kbd><kbd>→</kbd> rudiment · <kbd>↑</kbd><kbd>↓</kbd> tempo.
@@ -183,6 +189,6 @@
   <div class="row"><button type="button" class="b" id="edDel" data-t="del">Delete</button><span style="flex:1"></span>
     <button type="button" class="b" id="edCancel" data-t="cancel">Cancel</button><button type="button" class="b" id="edSave" style="background:var(--hi);color:#000" data-t="save">Save</button></div>
 </form></dialog>
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=dev"></script>
 </body>
 </html>
