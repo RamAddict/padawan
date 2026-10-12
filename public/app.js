@@ -2,8 +2,9 @@ import { RUDIMENTS, PT_NAMES, ES_NAMES, parse } from './rudiments.js?v=dev'; // 
 
 const $ = (id) => document.getElementById(id);
 const saved = JSON.parse(localStorage.getItem('padawan') || '{}');
-const state = { idx: 0, bpms: {}, clickVol: 0.6, padVol: 0.5, trainer: false, custom: [], clickSound: 'beep',
-  metro: { beats: 4, den: 4, sub: 1, acc: [2, 1, 1, 1] }, ...saved };
+const DEFAULTS = { clickVol: 0.6, padVol: 0.5, trainer: false, clickSound: 'beep' };
+const defaultMetro = () => ({ beats: 4, den: 4, sub: 1, acc: [2, 1, 1, 1] });
+const state = { idx: 0, bpms: {}, custom: [], ...DEFAULTS, metro: defaultMetro(), ...saved };
 const save = () => localStorage.setItem('padawan', JSON.stringify(state));
 
 // ---- i18n: English is in the HTML; other languages from the browser language (or chosen) ----
@@ -21,7 +22,7 @@ const PT = {
   edHelp: 'Uma nota por item, separadas por espaço: <b>D</b>/<b>E</b> mão · <b>&gt;</b> acento · <b>f</b> flam · <b>d</b> drag · <b>z</b> buzz · <b>-</b> pausa. Exemplo: <code>&gt;D E D D &gt;E D E E</code>',
   metro: 'Metrônomo livre', Metronome: 'Metrônomo', tsig: 'Compasso', subdiv: 'Subdivisão',
   sub1: '♩ Semínimas', sub2: '♫ Colcheias', sub3: '3 Tercinas', sub4: '♬ Semicolcheias', sub5: '5 Quintinas', sub6: '6 Sextinas',
-  digital: 'Visor digital', bar: 'compasso',
+  reset: '↺ Restaurar', digital: 'Visor digital', bar: 'compasso',
   tapHint: 'Toque num tempo para alternar acento → normal → mudo.', beep: 'Bipe', clickS: 'Clique', wood: 'Bloco de madeira',
   about: 'Sobre', bad: 'Nota inválida: ', del: 'Apagar', cancel: 'Cancelar', save: 'Salvar', noName: 'Dê um nome.', empty: 'Adicione algumas notas.',
 };
@@ -38,7 +39,7 @@ const ES = {
   edHelp: 'Una nota por elemento, separadas por espacios: <b>D</b>/<b>I</b> mano · <b>&gt;</b> acento · <b>f</b> flam · <b>d</b> drag · <b>z</b> buzz · <b>-</b> silencio. Ejemplo: <code>&gt;D I D D &gt;I D I I</code>',
   metro: 'Metrónomo libre', Metronome: 'Metrónomo', tsig: 'Compás', subdiv: 'Subdivisión',
   sub1: '♩ Negras', sub2: '♫ Corcheas', sub3: '3 Tresillos', sub4: '♬ Semicorcheas', sub5: '5 Quintillos', sub6: '6 Seisillos',
-  digital: 'Pantalla digital', bar: 'compás',
+  reset: '↺ Restablecer', digital: 'Pantalla digital', bar: 'compás',
   tapHint: 'Toca un tiempo para alternar acento → normal → silencio.', beep: 'Bip', clickS: 'Clic', wood: 'Bloque de madera',
   about: 'Acerca de', bad: 'Nota no válida: ', del: 'Borrar', cancel: 'Cancelar', save: 'Guardar', noName: 'Ponle un nombre.', empty: 'Agrega algunas notas.',
 };
@@ -246,10 +247,8 @@ $('down').onclick = () => setBpm(bpm() - 5);
 $('bpm').oninput = (e) => setBpm(+e.target.value);
 $('presets').onclick = (e) => { if (e.target.tagName === 'BUTTON') setBpm(+e.target.textContent); };
 for (const k of ['clickVol', 'padVol']) {
-  $(k).value = state[k];
   $(k).oninput = (e) => { state[k] = +e.target.value; save(); };
 }
-$('clickSound').value = state.clickSound;
 $('clickSound').onchange = (e) => { state.clickSound = e.target.value; save(); };
 let taps = [];
 $('tap').onclick = () => {
@@ -261,13 +260,11 @@ $('tap').onclick = () => {
 
 // ---- free metronome controls ----
 $('mBeats').innerHTML = Array.from({ length: 12 }, (_, i) => `<option>${i + 1}</option>`).join('');
-$('mBeats').value = state.metro.beats; $('mDen').value = state.metro.den; $('mSub').value = state.metro.sub;
 $('mBeats').onchange = $('mDen').onchange = () => {
   const m = state.metro;
   m.beats = +$('mBeats').value; m.den = +$('mDen').value; m.acc = defaultAcc(m.beats, m.den);
   save(); restartIfPlaying(() => select(state.idx));
 };
-$('mDigital').checked = !!state.metro.digital;
 $('mDigital').onchange = (e) => {
   state.metro.digital = e.target.checked; save();
   $('score').innerHTML = renderMetro(); cells = $('score').querySelectorAll('.dot, .subdot'); // swap view without restarting
@@ -281,8 +278,22 @@ $('score').onclick = (e) => {
   b.classList.remove('l0', 'l1', 'l2'); b.classList.add(`l${acc[i]}`);
   save();
 };
-$('trainer').checked = state.trainer;
 $('trainer').onchange = (e) => { state.trainer = e.target.checked; loops = 0; save(); };
+
+function syncControls() {
+  for (const k of ['clickVol', 'padVol', 'clickSound']) $(k).value = state[k];
+  $('trainer').checked = state.trainer;
+  const m = state.metro;
+  $('mBeats').value = m.beats; $('mDen').value = m.den; $('mSub').value = m.sub; $('mDigital').checked = !!m.digital;
+}
+// Reset: sound settings, this item's tempo, and (on the metronome) its meter. Custom rudiments are kept.
+$('reset').onclick = () => {
+  Object.assign(state, DEFAULTS);
+  delete state.bpms[rud.n];
+  if (rud.metro) state.metro = defaultMetro();
+  save(); syncControls();
+  restartIfPlaying(() => select(state.idx));
+};
 
 document.addEventListener('keydown', (e) => {
   if (document.querySelector('dialog[open]') || e.target.tagName === 'SELECT' || (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox')) return;
@@ -352,4 +363,5 @@ $('edDel').onclick = () => {
 
 $('play').textContent = t('play', '▶ Play');
 renderList();
+syncControls();
 select(state.idx);
