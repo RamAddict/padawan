@@ -67,3 +67,15 @@ export function parse(pattern) {
     return { accent: !!m[1], orn: m[2], hand: m[3] };
   });
 }
+
+// Portuguese names, same order as RUDIMENTS.
+export const PT_NAMES = [
+  'Rulo de Toques Simples', 'Toque Simples de Quatro', 'Toque Simples de Sete', 'Rulo de Múltiplos Toques',
+  'Rulo de Toques Triplos', 'Rulo de Toques Duplos', 'Rulo de 5 Toques', 'Rulo de 6 Toques', 'Rulo de 7 Toques',
+  'Rulo de 9 Toques', 'Rulo de 10 Toques', 'Rulo de 11 Toques', 'Rulo de 13 Toques', 'Rulo de 15 Toques', 'Rulo de 17 Toques',
+  'Paradiddle Simples', 'Paradiddle Duplo', 'Paradiddle Triplo', 'Paradiddle-Diddle Simples',
+  'Flam', 'Flam Acentuado', 'Flam Tap', 'Flamacue', 'Flam Paradiddle', 'Flammed Mill Simples', 'Flam Paradiddle-Diddle',
+  'Pataflafla', 'Tercina Suíça', 'Flam Tap Invertido', 'Flam Drag',
+  'Drag', 'Drag Tap Simples', 'Drag Tap Duplo', 'Lição 25', 'Dragadiddle Simples', 'Drag Paradiddle nº 1',
+  'Drag Paradiddle nº 2', 'Ratamacue Simples', 'Ratamacue Duplo', 'Ratamacue Triplo',
+];

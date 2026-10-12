@@ -1,9 +1,30 @@
-import { RUDIMENTS, parse } from './rudiments.js';
+import { RUDIMENTS, PT_NAMES, parse } from './rudiments.js';
 
 const $ = (id) => document.getElementById(id);
 const saved = JSON.parse(localStorage.getItem('padawan') || '{}');
 const state = { idx: 0, bpms: {}, clickVol: 0.6, padVol: 0.5, trainer: false, ...saved };
 const save = () => localStorage.setItem('padawan', JSON.stringify(state));
+
+// ---- i18n: English is in the HTML; Portuguese when the browser language is pt-* (or chosen) ----
+const pt = (state.lang ?? (navigator.language.startsWith('pt') ? 'pt' : 'en')) === 'pt';
+const PT = {
+  sub: '40 rudimentos · treino no pad',
+  legend: '<b style="color:var(--r)">D</b> direita · <b style="color:var(--l)">E</b> esquerda · <b style="color:var(--hi)">&gt;</b> acento · letras pequenas = notas de passagem (flam / drag) · <b>z</b> = buzz · sublinhado = um clique',
+  tempo: 'Andamento (BPM)', click: 'Clique do metrônomo', sound: 'Som do rudimento',
+  trainer: 'Treino de velocidade: +5 BPM a cada 4 voltas',
+  footer: '<kbd>Espaço</kbd> tocar/parar · <kbd>←</kbd><kbd>→</kbd> rudimento · <kbd>↑</kbd><kbd>↓</kbd> andamento. Grátis e <a href="https://github.com/RamAddict/padawan">código aberto</a>. Baseado nos Rudimentos Internacionais da PAS.',
+  play: '▶ Tocar', stop: '■ Parar', Rolls: 'Rulos', Diddles: 'Diddles', Flams: 'Flams', Drags: 'Drags',
+};
+const t = (k, en) => (pt ? PT[k] : en);
+const hand = (h) => (pt ? { R: 'D', L: 'E' }[h] : h);
+const nameOf = (r) => (pt ? PT_NAMES[r.n - 1] : r.name);
+if (pt) {
+  document.documentElement.lang = 'pt-BR';
+  document.title = 'Padawan · 40 rudimentos de bateria + metrônomo';
+  document.querySelectorAll('[data-t]').forEach((el) => (el.innerHTML = PT[el.dataset.t]));
+}
+$('lang').textContent = pt ? 'English' : 'Português';
+$('lang').onclick = () => { state.lang = pt ? 'en' : 'pt'; save(); location.reload(); };
 
 let rud, notes, cells;
 const bpm = () => state.bpms[rud.n] ?? rud.bpm;
@@ -11,8 +32,8 @@ const bpm = () => state.bpms[rud.n] ?? rud.bpm;
 // ---- list + score rendering ----
 let family;
 for (const r of RUDIMENTS) {
-  if (r.family !== family) $('list').insertAdjacentHTML('beforeend', `<h2>${(family = r.family)}</h2>`);
-  $('list').insertAdjacentHTML('beforeend', `<button data-i="${r.n - 1}"><span>${r.n}</span>${r.name}</button>`);
+  if (r.family !== family) $('list').insertAdjacentHTML('beforeend', `<h2>${t((family = r.family), family)}</h2>`);
+  $('list').insertAdjacentHTML('beforeend', `<button data-i="${r.n - 1}"><span>${r.n}</span>${nameOf(r)}</button>`);
 }
 $('list').onclick = (e) => { const b = e.target.closest('button'); if (b) select(+b.dataset.i); };
 
@@ -22,14 +43,14 @@ function select(i) {
   notes = parse(rud.p);
   document.querySelectorAll('#list button').forEach((b) => b.classList.toggle('on', +b.dataset.i === state.idx));
   document.querySelector('#list .on').scrollIntoView({ block: 'nearest' });
-  $('title').innerHTML = `${rud.n}. ${rud.name}<small>${rud.family}</small>`;
+  $('title').innerHTML = `${rud.n}. ${nameOf(rud)}<small>${t(rud.family, rud.family)}</small>`;
   let html = '';
   notes.forEach((x, s) => {
     if (s % rud.sub === 0) html += `${s ? '</div>' : ''}<div class="beat${s ? '' : ' down'}">`;
     if (!x) { html += '<div class="note rest"><div class="acc"></div><div class="st">·</div></div>'; return; }
-    const g = x.hand === 'R' ? 'l' : 'r';
+    const g = hand(x.hand === 'R' ? 'L' : 'R').toLowerCase();
     const grace = x.orn === 'f' ? `<sup>${g}</sup>` : x.orn === 'd' ? `<sup>${g + g}</sup>` : '';
-    html += `<div class="note ${x.hand}"><div class="acc">${x.accent ? '&gt;' : ''}</div><div class="st">${grace}${x.hand}${x.orn === 'z' ? '<sup>z</sup>' : ''}</div></div>`;
+    html += `<div class="note ${x.hand}"><div class="acc">${x.accent ? '&gt;' : ''}</div><div class="st">${grace}${hand(x.hand)}${x.orn === 'z' ? '<sup>z</sup>' : ''}</div></div>`;
   });
   $('score').innerHTML = html + '</div>';
   cells = $('score').querySelectorAll('.note');
@@ -116,7 +137,7 @@ async function toggle() {
     clearInterval(timer); timer = null; queue.length = 0;
     cells.forEach((c) => c.classList.remove('now'));
     wake?.release();
-    $('play').textContent = '▶ Play';
+    $('play').textContent = t('play', '▶ Play');
     return;
   }
   if (!ctx) initAudio();
@@ -125,7 +146,7 @@ async function toggle() {
   timer = setInterval(tick, 25); tick();
   requestAnimationFrame(draw);
   wake = await navigator.wakeLock?.request('screen').catch(() => null);
-  $('play').textContent = '■ Stop';
+  $('play').textContent = t('stop', '■ Stop');
 }
 
 // ---- wiring ----
@@ -151,4 +172,5 @@ document.addEventListener('keydown', (e) => {
   if (k) { e.preventDefault(); e.target.blur?.(); k(); }
 });
 
+$('play').textContent = t('play', '▶ Play');
 select(state.idx);
