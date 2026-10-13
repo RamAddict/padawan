@@ -139,9 +139,13 @@ function setBpm(v) {
 }
 
 // ---- audio ----
-let ctx, noise;
+let ctx, noise, out;
 function initAudio() {
   ctx = new AudioContext();
+  // master: ~2.5x louder, with a tanh soft clip so accents at full volume round off instead of distorting
+  const curve = new Float32Array(1025).map((_, i) => Math.tanh((i - 512) / 256) / Math.tanh(2));
+  out = new GainNode(ctx, { gain: 1.5 });
+  out.connect(new WaveShaperNode(ctx, { curve })).connect(ctx.destination);
   noise = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
   const d = noise.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -155,7 +159,7 @@ function pad(t, vel, hand, decay = 0.06) {
   f.type = 'bandpass'; f.frequency.value = hand === 'R' ? 2200 : 1700; f.Q.value = 1.2;
   g.gain.setValueAtTime(vel * state.padVol * 2, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + decay);
-  src.connect(f).connect(g).connect(ctx.destination);
+  src.connect(f).connect(g).connect(out);
   src.start(t); src.stop(t + 0.08);
 }
 
@@ -169,7 +173,7 @@ function click(t, level) {
   o.frequency.value = freq * (level === 2 ? 1.6 : level === 1 ? 1 : 0.8);
   g.gain.setValueAtTime(state.clickVol * gain * (level === 2 ? 0.6 : level === 1 ? 0.35 : 0.18), t);
   g.gain.exponentialRampToValueAtTime(0.001, t + decay);
-  o.connect(g).connect(ctx.destination);
+  o.connect(g).connect(out);
   o.start(t); o.stop(t + 0.05);
 }
 
